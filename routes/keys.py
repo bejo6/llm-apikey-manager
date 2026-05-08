@@ -87,11 +87,20 @@ def import_keys():
                     errors.append(f"Missing required fields in item: {item}")
                     continue
                 
+                # Convert provider name to provider_id
+                provider_name = item.get('provider')
+                provider = db.get_provider_by_name(provider_name)
+                if not provider:
+                    errors.append(f"Provider not found: {provider_name}")
+                    skipped += 1
+                    continue
+                
                 result = db.add(
-                    provider=item.get('provider'),
+                    provider_id=provider['id'],
                     name=item.get('name', ''),
                     apiKey=item.get('apiKey'),
                     authType=item.get('authType', 'apikey'),
+                    isActive=item.get('isActive', 1),
                     notes=item.get('notes')
                 )
                 
@@ -120,11 +129,20 @@ def import_keys():
                     errors.append(f"Missing required fields in row: {row}")
                     continue
                 
+                # Convert provider name to provider_id
+                provider_name = row.get('provider')
+                provider = db.get_provider_by_name(provider_name)
+                if not provider:
+                    errors.append(f"Provider not found: {provider_name}")
+                    skipped += 1
+                    continue
+                
                 result = db.add(
-                    provider=row.get('provider'),
+                    provider_id=provider['id'],
                     name=row.get('name', ''),
                     apiKey=row.get('apiKey'),
                     authType=row.get('authType', 'apikey'),
+                    isActive=int(row.get('isActive', 1)),
                     notes=row.get('notes')
                 )
                 
