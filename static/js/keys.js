@@ -11,11 +11,13 @@ async function loadKeys(page = 1) {
     pagination.page = page;
     pagination.per_page = parseInt(document.getElementById('perPageFilter').value);
     const search = document.getElementById('searchInput').value;
+    const name = document.getElementById('nameFilter').value;
     const provider = document.getElementById('providerFilter').value;
     const status = document.getElementById('statusFilter').value;
     
     let url = `/api/keys?page=${page}&per_page=${pagination.per_page}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (name) url += `&name=${encodeURIComponent(name)}`;
     if (provider) url += `&provider=${encodeURIComponent(provider)}`;
     if (status) url += `&status=${status}`;
     
@@ -151,6 +153,7 @@ let keysSearchTimeout;
 
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
+    const nameFilter = document.getElementById('nameFilter');
     const providerFilter = document.getElementById('providerFilter');
     const statusFilter = document.getElementById('statusFilter');
 
@@ -161,6 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (nameFilter) {
+        nameFilter.addEventListener('change', () => loadKeys(1));
+    }
+
     if (providerFilter) {
         providerFilter.addEventListener('change', () => loadKeys(1));
     }
@@ -168,6 +175,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (statusFilter) {
         statusFilter.addEventListener('change', () => loadKeys(1));
     }
+    
+    // Populate name filter
+    populateNameFilter();
     
     // Load keys on page load
     loadKeys(1);
@@ -196,23 +206,87 @@ function deleteKey(id, name) {
 // ============================================
 
 function openAddKeyModal() {
-    // Clear form
-    document.getElementById('addKeyProvider').value = '';
-    document.getElementById('addKeyName').value = '';
-    document.getElementById('addKeyApiKey').value = '';
-    document.getElementById('addKeyAuthType').value = 'apikey';
-    document.getElementById('addKeyStatus').value = '1';
-    document.getElementById('addKeyNotes').value = '';
+    // Clear ALL fields when opening
+    resetAddKeyFields(false);
     
-    // Populate providers dropdown
+    // Populate autocomplete and providers
+    populateExistingNames();
     populateAddKeyProviders();
+    
+    // Add event listener for provider change
+    const providerSelect = document.getElementById('addKeyProvider');
+    providerSelect.removeEventListener('change', updateProviderLink);
+    providerSelect.addEventListener('change', updateProviderLink);
+    
+    // Add event listener for name mode toggle
+    document.getElementById('nameModeExisting').addEventListener('change', toggleNameMode);
+    document.getElementById('nameModeNew').addEventListener('change', toggleNameMode);
     
     // Show modal
     document.getElementById('addKeyModal').style.display = 'flex';
 }
 
 function closeAddKeyModal() {
+    // Reset ALL fields when closing
+    resetAddKeyFields(false);
     document.getElementById('addKeyModal').style.display = 'none';
+}
+
+function resetAddKeyFields(keepName = false) {
+    if (!keepName) {
+        document.getElementById('addKeyNameSelect').value = '';
+        document.getElementById('addKeyNameInput').value = '';
+        // Reset to existing mode
+        document.getElementById('nameModeExisting').checked = true;
+        toggleNameMode();
+    }
+    document.getElementById('addKeyProvider').value = '';
+    document.getElementById('addKeyApiKey').value = '';
+    document.getElementById('addKeyAuthType').value = 'apikey';
+    document.getElementById('addKeyStatus').value = '1';
+    document.getElementById('addKeyNotes').value = '';
+    
+    // Hide provider link
+    hideProviderLink();
+}
+
+async function populateExistingNames() {
+    try {
+        const res = await fetch('/api/keys/names');
+        const data = await res.json();
+        const names = data.names || [];
+        
+        const select = document.getElementById('addKeyNameSelect');
+        select.innerHTML = '<option value="">Select existing name...</option>' + 
+            names.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
+        
+        // Auto-switch to "New" mode if no existing names
+        if (names.length === 0) {
+            document.getElementById('nameModeNew').checked = true;
+            toggleNameMode();
+        }
+    } catch (e) {
+        console.error('Failed to load existing names:', e);
+        // Switch to "New" mode on error
+        document.getElementById('nameModeNew').checked = true;
+        toggleNameMode();
+    }
+}
+
+async function populateNameFilter() {
+    try {
+        const res = await fetch('/api/keys/names');
+        const data = await res.json();
+        const names = data.names || [];
+        
+        const select = document.getElementById('nameFilter');
+        if (select) {
+            select.innerHTML = '<option value="">All Names</option>' + 
+                names.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
+        }
+    } catch (e) {
+        console.error('Failed to load name filter:', e);
+    }
 }
 
 async function populateAddKeyProviders() {
@@ -230,13 +304,76 @@ async function populateAddKeyProviders() {
     }
 }
 
+function toggleNameMode() {
+    const isExisting = document.getElementById('nameModeExisting').checked;
+    const selectEl = document.getElementById('addKeyNameSelect');
+    const inputEl = document.getElementById('addKeyNameInput');
+    
+    if (isExisting) {
+        selectEl.style.display = 'block';
+        inputEl.style.display = 'none';
+    } else {
+        selectEl.style.display = 'none';
+        inputEl.style.display = 'block';
+    }
+}
+
+async function updateProviderLink() {
+    const providerId = document.getElementById('addKeyProvider').value;
+    const linkContainer = document.getElementById('providerLinkContainer');
+    
+    if (!providerId) {
+        linkContainer.style.display = 'none';
+        return;
+    }
+    
+    try {
+        const res = await fetch(`/api/providers/${providerId}`);
+        const provider = await res.json();
+        
+        if (provider.website_url) {
+            linkContainer.innerHTML = `
+                <a href="${escapeHtml(provider.website_url)}" 
+                   target="_blank" 
+                   class="btn btn-secondary btn-sm">
+                    🔗 Visit ${escapeHtml(provider.display_name || provider.name)}
+                </a>
+            `;
+            linkContainer.style.display = 'block';
+        } else {
+            linkContainer.style.display = 'none';
+        }
+    } catch (e) {
+        console.error('Failed to load provider:', e);
+        linkContainer.style.display = 'none';
+    }
+}
+
+function hideProviderLink() {
+    const linkContainer = document.getElementById('providerLinkContainer');
+    if (linkContainer) {
+        linkContainer.style.display = 'none';
+    }
+}
+
 async function saveAddKey() {
     const provider_id = document.getElementById('addKeyProvider').value;
-    const name = document.getElementById('addKeyName').value.trim();
+    
+    // Get name from active mode (existing select or new input)
+    const isExisting = document.getElementById('nameModeExisting').checked;
+    let name = isExisting 
+        ? document.getElementById('addKeyNameSelect').value.trim()
+        : document.getElementById('addKeyNameInput').value.trim();
+    
     const apiKey = document.getElementById('addKeyApiKey').value.trim();
     const authType = document.getElementById('addKeyAuthType').value;
     const isActive = parseInt(document.getElementById('addKeyStatus').value);
     const notes = document.getElementById('addKeyNotes').value.trim();
+    
+    // Auto-lowercase if email format
+    if (name.includes('@')) {
+        name = name.toLowerCase();
+    }
     
     // Validation
     if (!provider_id) {
@@ -267,15 +404,19 @@ async function saveAddKey() {
         
         if (result.status === 'added' || result.id) {
             showToast('API Key added successfully!');
-            closeAddKeyModal();
+            // DON'T close modal - reset fields except name
+            resetAddKeyFields(true); // keepName = true
             loadKeys(1);
         } else if (result.status === 'duplicate') {
             showToast('API Key already exists', true);
+            // DON'T reset fields on error
         } else {
             showToast('Error adding API Key', true);
+            // DON'T reset fields on error
         }
     } catch (e) {
         showToast('Error adding API Key', true);
+        // DON'T reset fields on error
     }
 }
 

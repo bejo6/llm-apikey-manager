@@ -13,13 +13,15 @@ keys_bp = Blueprint('keys', __name__)
 def get_keys():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 50, type=int)
+    name = request.args.get('name', '')
     provider = request.args.get('provider', '')
     status = request.args.get('status', '')
     search = request.args.get('search', '')
     
     keys, total = db.get_all(
         page=page, 
-        per_page=per_page, 
+        per_page=per_page,
+        name=name if name else None,
         provider=provider if provider else None, 
         status=status if status else None, 
         search=search if search else None
@@ -167,3 +169,13 @@ def import_keys():
         return jsonify({"error": f"CSV parsing error: {str(e)}"}), 400
     except Exception as e:
         return jsonify({"error": f"Import failed: {str(e)}"}), 500
+
+@keys_bp.route("/api/keys/names", methods=["GET"])
+def get_key_names():
+    """Get distinct names from api_keys for autocomplete."""
+    try:
+        names = db.get_distinct_names()
+        return jsonify({"names": names})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+

@@ -92,7 +92,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-def get_all(page=1, per_page=50, provider=None, status=None, search=None):
+def get_all(page=1, per_page=50, name=None, provider=None, status=None, search=None):
     conn = get_conn()
     cur = conn.cursor()
 
@@ -106,6 +106,10 @@ def get_all(page=1, per_page=50, provider=None, status=None, search=None):
     WHERE 1=1
     """
     params = []
+
+    if name:
+        query += " AND k.name = ?"
+        params.append(name)
 
     if provider:
         query += " AND p.name = ?"
@@ -506,3 +510,18 @@ def get_providers_with_counts():
     """).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+def get_distinct_names():
+    """Get distinct non-empty names from api_keys table."""
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT DISTINCT name 
+        FROM api_keys 
+        WHERE name IS NOT NULL AND name != '' 
+        ORDER BY name
+    """)
+    rows = cur.fetchall()
+    conn.close()
+    return [row[0] for row in rows]
+
