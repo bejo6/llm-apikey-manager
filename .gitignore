@@ -67,3 +67,6 @@ Thumbs.db
 **/*-dev
 **/dev*.*
 **/*.code-workspace
+
+# Docker Compose (use docker-compose.example.yml as template)
+docker-compose.yml

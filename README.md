@@ -383,7 +383,7 @@ python scripts/seeders/seed_test_keys.py
 - [ ] **Dark/Light Theme Toggle** - User preference for theme
 - [ ] **Keyboard Shortcuts** - Add more keyboard shortcuts for power users
 - [ ] **API Documentation** - OpenAPI/Swagger documentation for API endpoints
-- [ ] **Docker Support** - Dockerfile and docker-compose for easy deployment
+- [x] **Docker Support** - Dockerfile and docker-compose for easy deployment (see DOCKER.md)
 
 ---
 

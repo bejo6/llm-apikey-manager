@@ -2,15 +2,22 @@
 
 ## Quick Start
 
-### 1. Build and run with Docker Compose
+### 1. Copy example config
+```bash
+cp docker-compose.example.yml docker-compose.yml
+```
+
+Edit `docker-compose.yml` if needed (change port, workers, etc.)
+
+### 2. Build and run with Docker Compose
 ```bash
 docker compose up -d
 ```
 
-### 2. Access the app
+### 3. Access the app
 Open http://localhost:5001
 
-### 3. Stop the app
+### 4. Stop the app
 ```bash
 docker compose down
 ```
