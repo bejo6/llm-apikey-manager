@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Use official uv image
-FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim
+FROM ghcr.io/astral-sh/uv:python3.11-alpine3.23
 
 WORKDIR /app
 
