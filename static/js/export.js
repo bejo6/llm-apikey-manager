@@ -4,42 +4,135 @@
 // Export Functions
 // ============================================
 
-async function doExport() {
+async function generatePreview() {
     const format = document.getElementById('exportFormat').value;
     const provider = document.getElementById('exportProvider').value;
     
+    try {
+        const output = await fetchExportData(format, provider);
+        
+        // Show preview in textarea
+        document.getElementById('exportOutput').value = output;
+        
+        showToast('Preview generated successfully!');
+        
+    } catch (e) {
+        console.error('Export error:', e);
+        showToast('Error generating preview', true);
+    }
+}
+
+async function downloadExport() {
+    const format = document.getElementById('exportFormat').value;
+    const provider = document.getElementById('exportProvider').value;
+    
+    try {
+        const output = await fetchExportData(format, provider);
+        
+        // Determine filename and MIME type
+        let filename = '';
+        let mimeType = '';
+        
+        if (format === 'json') {
+            filename = `apikeys_${Date.now()}.json`;
+            mimeType = 'application/json';
+        } else if (format === 'csv') {
+            filename = `apikeys_${Date.now()}.csv`;
+            mimeType = 'text/csv';
+        } else if (format === 'env') {
+            filename = `apikeys_${Date.now()}.env`;
+            mimeType = 'text/plain';
+        }
+        
+        // Download file
+        downloadFile(output, filename, mimeType);
+        
+        showToast(`Downloaded ${filename}`);
+        
+    } catch (e) {
+        console.error('Download error:', e);
+        showToast('Error downloading file', true);
+    }
+}
+
+async function fetchExportData(format, provider) {
     // Get ALL keys for export (bypass pagination)
     let url = '/api/keys?page=1&per_page=100000';
     if (provider) url += `&provider=${encodeURIComponent(provider)}`;
     
-    try {
-        const res = await fetch(url);
-        const data = await res.json();
-        const keys = data.data;
+    const res = await fetch(url);
+    const data = await res.json();
+    const keys = data.data;
+    
+    let output = '';
+    
+    if (format === 'json') {
+        // Export format compatible with import
+        const exportData = keys.map(k => ({
+            provider: k.provider, // Use provider name (not provider_id)
+            name: k.name || '',
+            apiKey: k.apiKey,
+            authType: k.authType || 'apikey',
+            isActive: k.isActive,
+            notes: k.notes || ''
+        }));
+        output = JSON.stringify(exportData, null, 2);
         
-        let output = '';
-        if (format === 'json') {
-            output = JSON.stringify(keys, null, 2);
-        } else if (format === 'csv') {
-            const headers = ['provider', 'name', 'apiKey', 'authType', 'isActive', 'notes'];
-            output = headers.join(',') + '\n' + keys.map(k => 
-                headers.map(h => `"${(k[h] || '').replace(/"/g, '""')}"`).join(',')
-            ).join('\n');
-        } else if (format === 'env') {
-            output = keys.map(k => `# ${k.provider}\n${k.provider.toUpperCase().replace(/-/g, '_')}_KEY="${k.apiKey}"`).join('\n\n');
-        }
+    } else if (format === 'csv') {
+        // CSV with proper escaping
+        const headers = ['provider', 'name', 'apiKey', 'authType', 'isActive', 'notes'];
+        const csvRows = [headers.join(',')];
         
-        document.getElementById('exportOutput').value = output;
-        showToast('Export generated successfully!');
-    } catch (e) {
-        showToast('Error generating export', true);
+        keys.forEach(k => {
+            const row = [
+                escapeCSV(k.provider || ''),
+                escapeCSV(k.name || ''),
+                escapeCSV(k.apiKey || ''),
+                escapeCSV(k.authType || 'apikey'),
+                k.isActive ? '1' : '0',
+                escapeCSV(k.notes || '')
+            ];
+            csvRows.push(row.join(','));
+        });
+        
+        output = csvRows.join('\n');
+        
+    } else if (format === 'env') {
+        // .env format (not importable, just for reference)
+        output = keys.map(k => {
+            const envKey = k.provider.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+            return `# ${k.provider}${k.name ? ' - ' + k.name : ''}\n${envKey}_KEY="${k.apiKey}"`;
+        }).join('\n\n');
     }
+    
+    return output;
+}
+
+function escapeCSV(value) {
+    // Escape CSV values: wrap in quotes if contains comma, quote, or newline
+    const str = String(value);
+    if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+        return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+}
+
+function downloadFile(content, filename, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 function copyExport() {
     const output = document.getElementById('exportOutput').value;
     if (!output) {
-        showToast('Nothing to copy', true);
+        showToast('Generate preview first', true);
         return;
     }
     
