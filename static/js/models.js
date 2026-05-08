@@ -54,9 +54,9 @@ function renderModels(models) {
     
     tbody.innerHTML = models.map(m => `
         <tr>
-            <td><strong>${escapeHtml(m.provider)}</strong></td>
+            <td><strong>${escapeHtml(m.provider_display_name)}</strong></td>
             <td>${escapeHtml(m.model_name)}</td>
-            <td><code style="font-size: 11px;">${escapeHtml(m.model_id)}</code></td>
+            <td class="clickable copy-to-clipboard" onclick="copyToClipboard('${escapeHtml(m.model_id)}', 'Model ID')" title="Click to copy"><code style="font-size: 11px;">${escapeHtml(m.model_id)}</code></td>
             <td>${formatContextLength(m.context_length)}</td>
             <td><span class="badge ${m.is_free ? 'badge-active' : 'badge-inactive'}">${m.is_free ? 'Free' : 'Paid'}</span></td>
             <td>${formatFreeTier(m.free_tier_type)}</td>
@@ -190,11 +190,16 @@ function editModel(id) {
     // Fetch model data
     fetch(`/api/models/${id}`)
         .then(res => res.json())
-        .then(model => {
+        .then(async model => {
             document.getElementById('modelModalTitle').textContent = 'Edit Model';
             document.getElementById('editModelId').value = model.id;
+            
+            // Populate providers dropdown FIRST
+            await populateAddModelProviders();
+            
+            // THEN set the value
             document.getElementById('addModelProvider').value = model.provider_id;
-            document.getElementById('addModelProvider').disabled = true; // Lock provider on edit
+            document.getElementById('addModelProvider').disabled = false; // Allow changing provider
             document.getElementById('addModelName').value = model.model_name;
             document.getElementById('addModelId').value = model.model_id;
             document.getElementById('addModelContext').value = model.context_length || '';
@@ -203,9 +208,6 @@ function editModel(id) {
             document.getElementById('addModelRPM').value = model.rate_limit_rpm || '';
             document.getElementById('addModelTPM').value = model.rate_limit_tpm || '';
             document.getElementById('addModelNotes').value = model.notes || '';
-            
-            // Populate providers dropdown
-            populateAddModelProviders();
             
             // Show modal
             document.getElementById('addModelModal').style.display = 'flex';
@@ -340,3 +342,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load models on page load
     loadModels(1);
 });
+
+// ============================================
+// Copy to Clipboard
+// ============================================
+
+function copyToClipboard(text, label) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast(`${label} copied to clipboard!`);
+    }).catch(() => {
+        showToast('Failed to copy', true);
+    });
+}
