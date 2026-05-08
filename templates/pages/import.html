@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Import Page -->
+<div id="page-import" class="page">
+    <div class="page-header">
+        <h2 class="page-title">Import API Keys</h2>
+        <p class="page-subtitle">Upload JSON or CSV file to bulk-import API keys</p>
+    </div>
+    
+    <div class="card">
+        <div class="form-group">
+            <label class="form-label">Select File</label>
+            <input type="file" id="importFile" accept=".json,.csv" class="form-input">
+            <p style="color: var(--text-secondary); font-size: 12px; margin-top: 8px;">
+                Supported formats: JSON (array of objects), CSV (with header row)
+            </p>
+        </div>
+        
+        <button class="btn btn-primary" onclick="importKeys()">Import</button>
+        
+        <!-- Import Result -->
+        <div id="importResult" style="margin-top: 16px; display: none;">
+            <div class="card-header">
+                <span class="card-title">Import Result</span>
+            </div>
+            <div id="importResultText" style="padding: 12px; font-size: 14px;"></div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/import.js') }}"></script>
+{% endblock %}

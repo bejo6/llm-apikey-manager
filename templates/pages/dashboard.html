@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Dashboard Page -->
+<div id="page-dashboard" class="page">
+    <div class="page-header">
+        <h2 class="page-title">Dashboard</h2>
+        <p class="page-subtitle">Overview of your API keys and providers</p>
+    </div>
+    
+    <!-- Summary Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
+        <div class="card">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 32px;">🔑</div>
+                <div>
+                    <div style="font-size: 24px; font-weight: 600; color: var(--primary);" id="totalKeys">-</div>
+                    <div style="font-size: 14px; color: var(--text-secondary);">Total API Keys</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 32px;">🏢</div>
+                <div>
+                    <div style="font-size: 24px; font-weight: 600; color: var(--primary);" id="totalProviders">-</div>
+                    <div style="font-size: 14px; color: var(--text-secondary);">Providers</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 32px;">🤖</div>
+                <div>
+                    <div style="font-size: 24px; font-weight: 600; color: var(--primary);" id="totalModels">-</div>
+                    <div style="font-size: 14px; color: var(--text-secondary);">Free Models</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 32px;">✅</div>
+                <div>
+                    <div style="font-size: 24px; font-weight: 600; color: var(--success);" id="activeKeys">-</div>
+                    <div style="font-size: 14px; color: var(--text-secondary);">Active Keys</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Quick Actions</span>
+        </div>
+        <div style="display: flex; gap: 12px; padding: 16px;">
+            <a href="/keys" class="btn btn-primary" style="text-decoration: none;">
+                📋 View All Keys
+            </a>
+            <a href="/providers" class="btn btn-secondary" style="text-decoration: none;">
+                🏢 Manage Providers
+            </a>
+            <a href="/models" class="btn btn-secondary" style="text-decoration: none;">
+                🤖 Browse Models
+            </a>
+            <a href="/import" class="btn btn-secondary" style="text-decoration: none;">
+                📥 Import Keys
+            </a>
+            <a href="/export" class="btn btn-secondary" style="text-decoration: none;">
+                📤 Export Keys
+            </a>
+        </div>
+    </div>
+    
+    <!-- Recent Keys -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Recent API Keys</span>
+        </div>
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Provider</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Added</th>
+                    </tr>
+                </thead>
+                <tbody id="recentKeysBody">
+                    <tr>
+                        <td colspan="4" class="empty-state">
+                            <div class="empty-text">Loading...</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

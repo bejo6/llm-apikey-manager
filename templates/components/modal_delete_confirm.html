@@ -1,0 +1,18 @@
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <h3>Confirm Delete</h3>
+            <button class="icon-btn" onclick="closeDeleteConfirmModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="deleteTargetId">
+            <input type="hidden" id="deleteTargetType">
+            <p id="deleteConfirmMessage" style="margin: 0; color: var(--text-primary);">Are you sure you want to delete this item?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeDeleteConfirmModal()">Cancel</button>
+            <button class="btn" style="background: var(--danger); color: white;" onclick="confirmDelete()">Delete</button>
+        </div>
+    </div>
+</div>

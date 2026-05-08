@@ -1,0 +1,98 @@
+<!-- Add Key Modal -->
+<div id="addKeyModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <h3>Add API Key</h3>
+            <button class="icon-btn" onclick="closeAddKeyModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Provider *</label>
+                <select class="form-select" id="addKeyProvider">
+                    <option value="">Select Provider</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Name / Email</label>
+                <input type="text" class="form-input" id="addKeyName" placeholder="user@example.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">API Key *</label>
+                <input type="text" class="form-input" id="addKeyApiKey" placeholder="sk-...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Auth Type</label>
+                <select class="form-select" id="addKeyAuthType">
+                    <option value="apikey">API Key</option>
+                    <option value="bearer">Bearer</option>
+                    <option value="oauth2">OAuth2</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="addKeyStatus">
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea class="form-input" id="addKeyNotes" rows="2" placeholder="Optional notes..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeAddKeyModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveAddKey()">Add Key</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit API Key</h3>
+            <button class="icon-btn" onclick="closeEditModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editId">
+            <div class="form-group">
+                <label class="form-label">Provider</label>
+                <select class="form-select" id="editProvider">
+                    <option value="">Select Provider</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Name / Email</label>
+                <input type="text" class="form-input" id="editName">
+            </div>
+            <div class="form-group">
+                <label class="form-label">API Key</label>
+                <input type="text" class="form-input" id="editKey">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Auth Type</label>
+                <select class="form-select" id="editAuth">
+                    <option value="apikey">apikey</option>
+                    <option value="bearer">bearer</option>
+                    <option value="oauth2">oauth2</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="editStatus">
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <input type="text" class="form-input" id="editNotes">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Keys Page -->
+<div id="page-keys" class="page">
+    <div class="page-header">
+        <h2 class="page-title">API Keys</h2>
+        <p class="page-subtitle">Manage your API keys</p>
+    </div>
+    
+    <div class="search-bar">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search keys...">
+        <div style="display: flex; gap: 8px;">
+            <select class="form-select" id="providerFilter" style="width: auto;">
+                <option value="">All Providers</option>
+            </select>
+            <select class="form-select" id="statusFilter" style="width: auto;">
+                <option value="">All Status</option>
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+            </select>
+            <select class="form-select" id="perPageFilter" style="width: auto;" onchange="loadKeys(1)">
+                <option value="5">5 / page</option>
+                <option value="10" selected>10 / page</option>
+                <option value="25">25 / page</option>
+                <option value="50">50 / page</option>
+                <option value="100">100 / page</option>
+            </select>
+            <button class="btn btn-primary" onclick="openAddKeyModal()">➕ Add Key</button>
+        </div>
+    </div>
+    
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Provider</th>
+                    <th>Name</th>
+                    <th>API Key</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="keysTableBody">
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        <div class="empty-icon">🔑</div>
+                        <div class="empty-text">Loading...</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination" id="pagination"></div>
+</div>
+
+
+{% include 'components/modals_keys.html' %}
+{% include 'components/modal_delete_confirm.html' %}
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/keys.js') }}"></script>
+{% endblock %}
+

@@ -1,0 +1,43 @@
+<!-- Add Page -->
+<div id="page-add" class="page" style="display: none;">
+    <div class="page-header">
+        <h2 class="page-title">Add New API Key</h2>
+        <p class="page-subtitle">Add a new API key to your collection</p>
+    </div>
+    
+    <div class="card">
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Provider</label>
+                <input type="text" class="form-input" id="addProvider" list="providerDatalist" placeholder="Select or type provider...">
+                <datalist id="providerDatalist"></datalist>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Name / Email</label>
+                <input type="text" class="form-input" id="addName" placeholder="user@example.com">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">API Key</label>
+                <input type="text" class="form-input" id="addKey" placeholder="sk-xxx, gsk_xxx...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Auth Type</label>
+                <select class="form-select" id="addAuth">
+                    <option value="apikey">apikey</option>
+                    <option value="bearer">bearer</option>
+                    <option value="oauth2">oauth2</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Notes</label>
+            <input type="text" class="form-input" id="addNotes" placeholder="Optional notes...">
+        </div>
+        
+        <button class="btn btn-primary" onclick="addKey()">Add Key</button>
+    </div>
+</div>

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Export Page -->
+<div id="page-export" class="page">
+    <div class="page-header">
+        <h2 class="page-title">Export API Keys</h2>
+        <p class="page-subtitle">Export your keys in various formats</p>
+    </div>
+    
+    <div class="card">
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Format</label>
+                <select class="form-select" id="exportFormat">
+                    <option value="json">JSON</option>
+                    <option value="csv">CSV</option>
+                    <option value="env">.env</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Provider</label>
+                <select class="form-select" id="exportProvider">
+                    <option value="">All Providers</option>
+                </select>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; margin-top: 16px;">
+            <button class="btn btn-primary" onclick="doExport()">Generate Export</button>
+            <button class="btn btn-secondary" onclick="copyExport()">Copy to Clipboard</button>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Output</span>
+        </div>
+        <textarea class="form-input" id="exportOutput" rows="15" readonly style="font-family: monospace; font-size: 12px;"></textarea>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/export.js') }}"></script>
+{% endblock %}

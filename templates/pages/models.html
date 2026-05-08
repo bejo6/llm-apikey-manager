@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Models Page -->
+<div id="page-models" class="page">
+    <div class="page-header">
+        <h2 class="page-title">Model Catalog</h2>
+        <p class="page-subtitle">Free models from various providers</p>
+    </div>
+    
+    <div class="search-bar">
+        <input type="text" class="search-input" id="modelsSearchInput" placeholder="Search models...">
+        <div style="display: flex; gap: 8px;">
+            <select class="form-select" id="modelsProviderFilter" style="width: auto;">
+                <option value="">All Providers</option>
+            </select>
+            <select class="form-select" id="modelsFreeFilter" style="width: auto;">
+                <option value="">All Status</option>
+                <option value="1">Free Only</option>
+                <option value="0">Paid Only</option>
+            </select>
+            <select class="form-select" id="modelsTierFilter" style="width: auto;">
+                <option value="">All Tiers</option>
+                <option value="always_free">Always Free</option>
+                <option value="preview">Preview</option>
+                <option value="trial">Trial</option>
+                <option value="credit_based">Credit Based</option>
+            </select>
+            <select class="form-select" id="modelsPerPageFilter" style="width: auto;" onchange="loadModels(1)">
+                <option value="5">5 / page</option>
+                <option value="10" selected>10 / page</option>
+                <option value="25">25 / page</option>
+                <option value="50">50 / page</option>
+                <option value="100">100 / page</option>
+            </select>
+            <button class="btn btn-primary" onclick="openAddModelModal()">➕ Add Model</button>
+        </div>
+    </div>
+    
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Provider</th>
+                    <th>Model Name</th>
+                    <th>Model ID</th>
+                    <th>Context</th>
+                    <th>Status</th>
+                    <th>Tier</th>
+                    <th>Rate Limits</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="modelsTableBody">
+                <tr>
+                    <td colspan="8" class="empty-state">
+                        <div class="empty-icon">🤖</div>
+                        <div class="empty-text">Loading...</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination" id="modelsPagination"></div>
+</div>
+
+
+{% include 'components/modals_models.html' %}
+{% include 'components/modal_delete_confirm.html' %}
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/models.js') }}"></script>
+{% endblock %}

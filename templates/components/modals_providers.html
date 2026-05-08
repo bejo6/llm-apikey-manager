@@ -1,0 +1,101 @@
+<!-- Add Provider Modal -->
+<div id="addProviderModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add Provider</h3>
+            <button class="icon-btn" onclick="closeAddProviderModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Provider Name (canonical) *</label>
+                <input type="text" class="form-input" id="addProviderName" placeholder="openai, anthropic, google">
+                <p style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">Lowercase, no spaces. Used as identifier.</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Display Name *</label>
+                <input type="text" class="form-input" id="addProviderDisplayName" placeholder="OpenAI, Anthropic, Google AI">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Website URL</label>
+                <input type="text" class="form-input" id="addProviderWebsite" placeholder="https://openai.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Docs URL</label>
+                <input type="text" class="form-input" id="addProviderDocs" placeholder="https://platform.openai.com/docs">
+            </div>
+            <div class="form-group">
+                <label class="form-label">API Base URL</label>
+                <input type="text" class="form-input" id="addProviderApiBase" placeholder="https://api.openai.com/v1">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea class="form-input" id="addProviderNotes" rows="3" placeholder="Optional notes..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeAddProviderModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveAddProvider()">Add Provider</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Provider Modal -->
+<div id="editProviderModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="providerModalTitle">Edit Provider</h3>
+            <button class="icon-btn" onclick="closeEditProviderModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editProviderId">
+            <div class="form-group">
+                <label class="form-label">Provider Name (canonical)</label>
+                <input type="text" class="form-input" id="editProviderName" placeholder="openai, anthropic, google">
+                <p style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">Lowercase, no spaces. Used as identifier.</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Display Name</label>
+                <input type="text" class="form-input" id="editProviderDisplayName" placeholder="OpenAI, Anthropic, Google AI">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Website URL</label>
+                <input type="text" class="form-input" id="editProviderWebsite" placeholder="https://openai.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Docs URL</label>
+                <input type="text" class="form-input" id="editProviderDocs" placeholder="https://platform.openai.com/docs">
+            </div>
+            <div class="form-group">
+                <label class="form-label">API Base URL</label>
+                <input type="text" class="form-input" id="editProviderApiBase" placeholder="https://api.openai.com/v1">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea class="form-input" id="editProviderNotes" rows="3" placeholder="Optional notes..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeEditProviderModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveProviderEdit()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <h3>Confirm Delete</h3>
+            <button class="icon-btn" onclick="closeDeleteConfirmModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="deleteTargetId">
+            <input type="hidden" id="deleteTargetType">
+            <p id="deleteConfirmMessage" style="margin: 0; color: var(--text-primary);">Are you sure you want to delete this item?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeDeleteConfirmModal()">Cancel</button>
+            <button class="btn" style="background: var(--danger); color: white;" onclick="confirmDelete()">Delete</button>
+        </div>
+    </div>
+</div>

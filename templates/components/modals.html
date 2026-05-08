@@ -1,0 +1,108 @@
+
+
+<!-- Edit Provider Modal -->
+<div id="editProviderModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="providerModalTitle">Edit Provider</h3>
+            <button class="icon-btn" onclick="closeEditProviderModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editProviderId">
+            <div class="form-group">
+                <label class="form-label">Provider Name (canonical)</label>
+                <input type="text" class="form-input" id="editProviderName" placeholder="openai, anthropic, google">
+                <p style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">Lowercase, no spaces. Used as identifier.</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Display Name</label>
+                <input type="text" class="form-input" id="editProviderDisplayName" placeholder="OpenAI, Anthropic, Google AI">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Website URL</label>
+                <input type="text" class="form-input" id="editProviderWebsite" placeholder="https://openai.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Docs URL</label>
+                <input type="text" class="form-input" id="editProviderDocs" placeholder="https://platform.openai.com/docs">
+            </div>
+            <div class="form-group">
+                <label class="form-label">API Base URL</label>
+                <input type="text" class="form-input" id="editProviderApiBase" placeholder="https://api.openai.com/v1">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea class="form-input" id="editProviderNotes" rows="3" placeholder="Optional notes..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeEditProviderModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveProviderEdit()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Add Model Modal -->
+<div id="addModelModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3 id="modelModalTitle">Add Model</h3>
+            <button class="icon-btn" onclick="closeAddModelModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editModelId">
+            <div class="form-group">
+                <label class="form-label">Provider *</label>
+                <select class="form-select" id="addModelProvider">
+                    <option value="">Select Provider</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Model Name *</label>
+                <input type="text" class="form-input" id="addModelName" placeholder="GPT-4, Claude 3.5 Sonnet">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Model ID *</label>
+                <input type="text" class="form-input" id="addModelId" placeholder="gpt-4, claude-3-5-sonnet-20241022">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Context Length</label>
+                <input type="number" class="form-input" id="addModelContext" placeholder="128000">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Is Free</label>
+                <select class="form-select" id="addModelIsFree">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Free Tier Type</label>
+                <select class="form-select" id="addModelFreeTier">
+                    <option value="">None</option>
+                    <option value="always_free">Always Free</option>
+                    <option value="preview">Preview</option>
+                    <option value="trial">Trial</option>
+                    <option value="credit_based">Credit Based</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Rate Limit (RPM)</label>
+                <input type="number" class="form-input" id="addModelRPM" placeholder="60">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Rate Limit (TPM)</label>
+                <input type="number" class="form-input" id="addModelTPM" placeholder="60000">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea class="form-input" id="addModelNotes" rows="2" placeholder="Optional notes..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeAddModelModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveAddModel()">Save</button>
+        </div>
+    </div>
+</div>

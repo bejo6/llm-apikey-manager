@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Providers Page -->
+<div id="page-providers" class="page">
+    <div class="page-header">
+        <h2 class="page-title">Providers</h2>
+        <p class="page-subtitle">Manage AI providers</p>
+    </div>
+    
+    <div class="search-bar">
+        <input type="text" class="search-input" id="providersSearchInput" placeholder="Search providers...">
+        <div style="display: flex; gap: 8px;">
+            <select class="form-select" id="providersPerPageFilter" style="width: auto;" onchange="loadProviders(1)">
+                <option value="5">5 / page</option>
+                <option value="10" selected>10 / page</option>
+                <option value="25">25 / page</option>
+                <option value="50">50 / page</option>
+                <option value="100">100 / page</option>
+            </select>
+            <button class="btn btn-primary" onclick="openAddProviderModal()">➕ Add Provider</button>
+        </div>
+    </div>
+    
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Provider</th>
+                    <th>Display Name</th>
+                    <th>Keys</th>
+                    <th>Models</th>
+                    <th>Website</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="providersTableBody">
+                <tr>
+                    <td colspan="6" class="empty-state">
+                        <div class="empty-icon">🏢</div>
+                        <div class="empty-text">Loading...</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination" id="providersPagination"></div>
+</div>
+
+
+{% include 'components/modals_providers.html' %}
+{% include 'components/modal_delete_confirm.html' %}
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/providers.js') }}"></script>
+{% endblock %}

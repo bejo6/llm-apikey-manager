@@ -1,0 +1,455 @@
+<script>
+    // Navigation
+    document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const page = btn.dataset.page;
+            switchPage(page);
+            // Update URL without reload
+            history.pushState({page: page}, '', `/${page}`);
+        });
+    });
+    
+    // Handle browser back/forward
+    window.addEventListener('popstate', (e) => {
+        if (e.state && e.state.page) {
+            switchPage(e.state.page);
+        } else {
+            // Default to keys page if no state
+            const path = window.location.pathname.substring(1) || 'keys';
+            switchPage(path);
+        }
+    });
+    
+    // On page load, detect current page from URL
+    function initPage() {
+        const path = window.location.pathname.substring(1) || 'keys';
+        switchPage(path);
+    }
+    
+    function switchPage(pageId) {
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        const navItem = document.querySelector(`[data-page="${pageId}"]`);
+        if (navItem) navItem.classList.add('active');
+        
+        document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+        const pageElement = document.getElementById(`page-${pageId}`);
+        if (pageElement) {
+            pageElement.style.display = 'block';
+            
+            // Load data for specific pages
+            if (pageId === 'keys') loadKeys();
+            else if (pageId === 'models') loadModels();
+            else if (pageId === 'providers') loadProviders();
+        }
+    }
+    
+    // Load keys with pagination
+    async function loadKeys(page = 1) {
+        pagination.page = page;
+        pagination.per_page = parseInt(document.getElementById('perPageFilter').value);
+        const search = document.getElementById('searchInput').value;
+        const provider = document.getElementById('providerFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        
+        let url = `/api/keys?page=${page}&per_page=${pagination.per_page}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        if (provider) url += `&provider=${encodeURIComponent(provider)}`;
+        if (status) url += `&status=${status}`;
+        
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            pagination = {
+                page: data.page,
+                per_page: data.per_page,
+                total: data.total,
+                pages: data.pages
+            };
+            
+            renderKeys(data.data);
+            renderPagination();
+            populateProviders();
+        } catch (e) {
+            console.error('Failed to load keys:', e);
+        }
+    }
+    
+    function renderKeys(keys) {
+        const tbody = document.getElementById('keysTableBody');
+        
+        if (keys.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        <div class="empty-icon">🔑</div>
+                        <div class="empty-text">No API keys found</div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = keys.map(k => `
+            <tr>
+                <td><strong>${escapeHtml(k.provider)}</strong></td>
+                <td class="key-cell" onclick="copyKey('${escapeHtml(k.name || '')}')\" title="Click to copy">${escapeHtml(k.name || '-')}</td>
+                <td class="key-cell" onclick="copyKey('${escapeHtml(k.apiKey)}')\" title="Click to copy">${escapeHtml(k.apiKey)}</td>
+                <td><span class="badge ${k.isActive ? 'badge-active' : 'badge-inactive'}">${k.isActive ? 'Active' : 'Inactive'}</span></td>
+                <td>
+                    <div class="action-btns">
+                        <button class="icon-btn edit" onclick="openEditModal('${k.id}', '${escapeHtml(k.provider)}', '${escapeHtml(k.name || '')}', '${escapeHtml(k.apiKey)}', '${k.authType}', '${k.isActive}', '${escapeHtml(k.notes || '')}')" title="Edit">✏️</button>
+                        <button class="icon-btn delete" onclick="deleteKey('${k.id}', '${escapeHtml(k.name || k.apiKey.substring(0, 20))}')" title="Delete">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    function renderPagination() {
+        const pg = document.getElementById('pagination');
+        if (pagination.pages <= 1) {
+            pg.innerHTML = `<span class="pg-info">${pagination.total} keys total</span>`;
+            return;
+        }
+        
+        const start = (pagination.page - 1) * pagination.per_page + 1;
+        const end = Math.min(pagination.page * pagination.per_page, pagination.total);
+        
+        let html = `<span class="pg-info">${start}-${end} of ${pagination.total}</span>`;
+        
+        // Pagination controls
+        html += `<div class="pg-controls">`;
+        
+        // First
+        html += `<button class="pg-btn" onclick="loadKeys(1)" ${pagination.page === 1 ? 'disabled' : ''} title="First">&laquo;</button>`;
+        
+        // Prev
+        html += `<button class="pg-btn" onclick="loadKeys(${pagination.page - 1})" ${pagination.page === 1 ? 'disabled' : ''} title="Previous">&lsaquo;</button>`;
+        
+        // Page numbers with ellipsis
+        for (let i = 1; i <= pagination.pages; i++) {
+            if (i === 1 || i === pagination.pages || (i >= pagination.page - 1 && i <= pagination.page + 1)) {
+                html += `<button class="pg-btn ${i === pagination.page ? 'active' : ''}" onclick="loadKeys(${i})">${i}</button>`;
+            } else if (i === pagination.page - 2 || i === pagination.page + 2) {
+                html += `<span class="pg-ellipsis">&hellip;</span>`;
+            }
+        }
+        
+        // Next
+        html += `<button class="pg-btn" onclick="loadKeys(${pagination.page + 1})" ${pagination.page >= pagination.pages ? 'disabled' : ''} title="Next">&rsaquo;</button>`;
+        
+        // Last
+        html += `<button class="pg-btn" onclick="loadKeys(${pagination.pages})" ${pagination.page >= pagination.pages ? 'disabled' : ''} title="Last">&raquo;</button>`;
+        
+        html += `</div>`;
+        
+        pg.innerHTML = html;
+    }
+    
+    async function populateProviders() {
+        try {
+            const res = await fetch('/api/providers?per_page=100');
+            const data = await res.json();
+            const providers = data.data || []; // Paginated response
+            
+            // Provider filter dropdown
+            const currentProviderFilter = document.getElementById('providerFilter').value;
+            document.getElementById('providerFilter').innerHTML = 
+                '<option value="">All Providers</option>' + 
+                providers.map(p => `<option value="${escapeHtml(p.name)}" ${p.name === currentProviderFilter ? 'selected' : ''}>${escapeHtml(p.display_name || p.name)} (${p.key_count})</option>`).join('');
+            
+            // Export dropdown (if exists)
+            const exportProviderEl = document.getElementById('exportProvider');
+            if (exportProviderEl) {
+                const currentExportProvider = exportProviderEl.value;
+                exportProviderEl.innerHTML = 
+                    '<option value="">All Providers</option>' + 
+                    providers.map(p => `<option value="${escapeHtml(p.name)}" ${p.name === currentExportProvider ? 'selected' : ''}>${escapeHtml(p.display_name || p.name)} (${p.key_count})</option>`).join('');
+            }
+            
+            // Add form datalist (if exists)
+            const datalistEl = document.getElementById('providerDatalist');
+            if (datalistEl) {
+                datalistEl.innerHTML = 
+                    providers.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.display_name || p.name)}</option>`).join('');
+            }
+
+        } catch (e) {
+            console.error('Failed to load providers:', e);
+        }
+    }
+    
+    // Search & Filter - debounced
+    let searchTimeout;
+    document.getElementById('searchInput').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => loadKeys(1), 300);
+    });
+    document.getElementById('providerFilter').addEventListener('change', () => loadKeys(1));
+    document.getElementById('statusFilter').addEventListener('change', () => loadKeys(1));
+    
+    // Add Key
+    async function addKey() {
+        const data = {
+            provider: document.getElementById('addProvider').value,
+            name: document.getElementById('addName').value,
+            apiKey: document.getElementById('addKey').value,
+            authType: document.getElementById('addAuth').value,
+            notes: document.getElementById('addNotes').value
+        };
+        
+        if (!data.provider || !data.apiKey) {
+            showToast('Provider and API Key are required', true);
+            return;
+        }
+        
+        try {
+            const res = await fetch('/api/keys', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            
+            if (result.status === 'added') {
+                showToast('API Key added successfully!');
+                document.getElementById('addProvider').value = '';
+                document.getElementById('addName').value = '';
+                document.getElementById('addKey').value = '';
+                document.getElementById('addNotes').value = '';
+                loadKeys(1);
+            } else {
+                showToast('Duplicate key or error', true);
+            }
+        } catch (e) {
+            showToast('Error adding key', true);
+        }
+    }
+    
+    // Delete Key
+    
+    // Edit Modal
+    function openEditModal(id, provider, name, apiKey, authType, isActive, notes) {
+        document.getElementById('editId').value = id;
+        document.getElementById('editProvider').value = provider;
+        document.getElementById('editName').value = name;
+        document.getElementById('editKey').value = apiKey;
+        document.getElementById('editAuth').value = authType;
+        document.getElementById('editStatus').value = isActive;
+        document.getElementById('editNotes').value = notes;
+        document.getElementById('editModal').style.display = 'flex';
+    }
+    
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+    
+    async function saveEdit() {
+        const id = document.getElementById('editId').value;
+        const data = {
+            provider: document.getElementById('editProvider').value,
+            name: document.getElementById('editName').value,
+            apiKey: document.getElementById('editKey').value,
+            authType: document.getElementById('editAuth').value,
+            isActive: parseInt(document.getElementById('editStatus').value),
+            notes: document.getElementById('editNotes').value
+        };
+        
+        if (!data.provider || !data.apiKey) {
+            showToast('Provider and API Key are required', true);
+            return;
+        }
+        
+        try {
+            const res = await fetch(`/api/keys/${id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if (result.updated) {
+                showToast('Key updated!');
+                closeEditModal();
+                loadKeys(pagination.page);
+            }
+        } catch (e) {
+            showToast('Error updating key', true);
+        }
+    }
+    
+    // Copy Key
+    function copyKey(key) {
+        if (!key) return;
+        navigator.clipboard.writeText(key).then(() => {
+            showToast('Copied to clipboard!');
+        }).catch(() => {
+            showToast('Failed to copy', true);
+        });
+    }
+    
+    // Export
+    async function doExport() {
+        const format = document.getElementById('exportFormat').value;
+        const provider = document.getElementById('exportProvider').value;
+        
+        // Get ALL keys for export (bypass pagination)
+        let url = '/api/keys?page=1&per_page=100000';
+        if (provider) url += `&provider=${encodeURIComponent(provider)}`;
+        
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            const keys = data.data;
+            
+            let output = '';
+            if (format === 'json') {
+                output = JSON.stringify(keys, null, 2);
+            } else if (format === 'csv') {
+                const headers = ['provider', 'name', 'apiKey', 'authType', 'isActive', 'notes'];
+                output = headers.join(',') + '\n' + keys.map(k => 
+                    headers.map(h => `"${(k[h] || '').replace(/"/g, '""')}"`).join(',')
+                ).join('\n');
+            } else if (format === 'env') {
+                output = keys.map(k => `# ${k.provider}\n${k.provider.toUpperCase().replace(/-/g, '_')}_KEY="${k.apiKey}"`).join('\n\n');
+            }
+            
+            document.getElementById('exportOutput').value = output;
+        } catch (e) {
+            showToast('Error generating export', true);
+        }
+    }
+    
+    function copyExport() {
+        const output = document.getElementById('exportOutput').value;
+        if (output) {
+            navigator.clipboard.writeText(output).then(() => {
+                showToast('Copied to clipboard!');
+            });
+        }
+    }
+    
+    // Import
+    async function importKeys() {
+        const fileInput = document.getElementById('importFile');
+        if (!fileInput.files.length) {
+            showToast('Please select a file', true);
+            return;
+        }
+        
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+            showToast('Importing...');
+            const res = await fetch('/api/keys/import', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await res.json();
+            
+            if (result.error) {
+                showToast(result.error, true);
+                return;
+            }
+            
+            // Show result
+            const resultDiv = document.getElementById('importResult');
+            const resultText = document.getElementById('importResultText');
+            resultDiv.style.display = 'block';
+            resultText.innerHTML = `
+                <div style="color: var(--success); margin-bottom: 8px;">✓ Import Complete</div>
+                <div>Imported: <strong>${result.imported}</strong> keys</div>
+                <div>Skipped: <strong>${result.skipped}</strong> keys (duplicates or invalid)</div>
+            `;
+            
+            showToast(`Imported ${result.imported} keys, skipped ${result.skipped}`);
+            
+            // Reset file input and refresh keys table
+            fileInput.value = '';
+            loadKeys(1);
+            
+        } catch (e) {
+            showToast('Error importing file', true);
+        }
+    }
+    
+    // Toast
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = 'toast' + (isError ? ' error' : '');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;');
+    }
+    
+    // ============================================
+    // Delete Confirmation (Shared)
+    // ============================================
+    
+    function closeDeleteConfirmModal() {
+        document.getElementById('deleteConfirmModal').style.display = 'none';
+    }
+    
+    async function confirmDelete() {
+        const id = document.getElementById('deleteTargetId').value;
+        const type = document.getElementById('deleteTargetType').value;
+        
+        if (type === 'provider') {
+            try {
+                const res = await fetch(`/api/providers/${id}`, {method: 'DELETE'});
+                const result = await res.json();
+                if (result.deleted) {
+                    showToast('Provider deleted successfully');
+                    closeDeleteConfirmModal();
+                    loadProviders(providersPagination.page);
+                } else {
+                    showToast('Failed to delete provider', true);
+                }
+            } catch (e) {
+                showToast('Error deleting provider', true);
+            }
+        } else if (type === 'model') {
+            try {
+                const res = await fetch(`/api/models/${id}`, {method: 'DELETE'});
+                const result = await res.json();
+                if (result.deleted) {
+                    showToast('Model deleted successfully');
+                    closeDeleteConfirmModal();
+                    loadModels(modelsPagination.page);
+                } else {
+                    showToast('Failed to delete model', true);
+                }
+            } catch (e) {
+                showToast('Error deleting model', true);
+            }
+        } else if (type === 'key') {
+            try {
+                const res = await fetch(`/api/keys/${id}`, {method: 'DELETE'});
+                const result = await res.json();
+                if (result.deleted) {
+                    showToast('Key deleted successfully');
+                    closeDeleteConfirmModal();
+                    loadKeys(pagination.page);
+                } else {
+                    showToast('Failed to delete key', true);
+                }
+            } catch (e) {
+                showToast('Error deleting key', true);
+            }
+        }
+    }
+    
+    // Init - detect page from URL
+    initPage();
+
+</script>
