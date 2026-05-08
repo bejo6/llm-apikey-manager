@@ -1,0 +1,10 @@
+[project]
+name = "apikey-manager-flask"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.14"
+dependencies = [
+    "flask==3.0.0",
+    "gunicorn==21.2.0",
+    "werkzeug==3.0.1",
+]

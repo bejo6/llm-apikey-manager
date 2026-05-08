@@ -1,5 +1,10 @@
 # Docker Deployment
 
+## Prerequisites
+
+- Docker & Docker Compose installed
+- `uv` installed locally (for development)
+
 ## Quick Start
 
 ### 1. Copy example config
@@ -15,11 +20,36 @@ docker compose up -d
 ```
 
 ### 3. Access the app
-Open http://localhost:5001
+Open http://localhost:5001 (or your configured port)
 
 ### 4. Stop the app
 ```bash
 docker compose down
+```
+
+---
+
+## Development Setup (Local)
+
+### Install dependencies with uv
+```bash
+# Sync dependencies from uv.lock
+uv sync
+
+# Activate virtual environment
+source .venv/bin/activate
+
+# Run app
+python app.py
+```
+
+### Add new dependencies
+```bash
+# Add package
+uv add package-name
+
+# Update lock file
+uv lock
 ```
 
 ---

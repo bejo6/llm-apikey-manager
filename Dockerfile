@@ -1,24 +1,24 @@
-FROM python:3.11-slim
+# syntax=docker/dockerfile:1
+
+# Use official uv image
+FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim
 
 WORKDIR /app
 
-# Install uv
-RUN pip install --no-cache-dir uv
+# Copy dependency files first (better caching)
+COPY pyproject.toml uv.lock ./
 
-# Copy dependency files
-COPY requirements.txt .
+# Install dependencies
+RUN uv sync --frozen --no-dev
 
-# Install dependencies using uv
-RUN uv pip install --system -r requirements.txt
-
-# Copy application files
+# Copy application code
 COPY . .
 
-# Create data directory
-RUN mkdir -p data
+# Add virtual environment to PATH
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Expose port
 EXPOSE 5000
 
-# Run with gunicorn for production
+# Run with gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "2", "--timeout", "60", "app:app"]
