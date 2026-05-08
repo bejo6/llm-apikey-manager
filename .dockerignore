@@ -1,0 +1,53 @@
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# uv
+.uv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Config with secrets
+providers.yaml
+.env.local
+.env
+
+# Database (don't commit real data)
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Development
+**/__dev/
+**/*-v[0-9].*
+**/*-v[0-9][0-9].*
+**/*-v[0-9]
+**/*-v[0-9][0-9]
+**/*-dev
+**/dev*.*
+**/*.code-workspace
+
+# Git
+.git/
