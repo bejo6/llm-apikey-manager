@@ -55,7 +55,7 @@ function renderKeys(keys) {
     
     tbody.innerHTML = keys.map(k => `
         <tr>
-            <td><strong>${escapeHtml(k.provider)}</strong></td>
+            <td><strong>${escapeHtml(k.provider_display_name)}</strong></td>
             <td class="key-cell" onclick="copyKey('${escapeHtml(k.name || '')}')" title="Click to copy">${escapeHtml(k.name || '-')}</td>
             <td class="key-cell" onclick="copyKey('${escapeHtml(k.apiKey)}')" title="Click to copy">${escapeHtml(k.apiKey)}</td>
             <td><span class="badge ${k.isActive ? 'badge-active' : 'badge-inactive'}">${k.isActive ? 'Active' : 'Inactive'}</span></td>
