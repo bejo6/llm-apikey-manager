@@ -495,12 +495,7 @@ async function saveEdit() {
 // ============================================
 
 function copyKey(key) {
-    if (!key) return;
-    navigator.clipboard.writeText(key).then(() => {
-        showToast('Copied to clipboard!');
-    }).catch(() => {
-        showToast('Failed to copy', true);
-    });
+    copyToClipboardSafe(key);
 }
 
 // ============================================
@@ -541,9 +536,7 @@ async function doExport() {
 function copyExport() {
     const output = document.getElementById('exportOutput').value;
     if (output) {
-        navigator.clipboard.writeText(output).then(() => {
-            showToast('Copied to clipboard!');
-        });
+        copyToClipboardSafe(output);
     }
 }
 

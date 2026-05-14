@@ -20,6 +20,37 @@ function escapeHtml(str) {
               .replace(/"/g, '&quot;');
 }
 
+function copyToClipboardSafe(text, successMsg = 'Copied to clipboard!', errorMsg = 'Failed to copy') {
+    if (!text) return;
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast(successMsg);
+        }).catch(() => {
+            fallbackCopy(text, successMsg, errorMsg);
+        });
+    } else {
+        fallbackCopy(text, successMsg, errorMsg);
+    }
+}
+
+function fallbackCopy(text, successMsg, errorMsg) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    try {
+        const ok = document.execCommand('copy');
+        showToast(ok ? successMsg : errorMsg, !ok);
+    } catch (e) {
+        showToast(errorMsg, true);
+    }
+    document.body.removeChild(textarea);
+}
+
 function closeDeleteConfirmModal() {
     document.getElementById('deleteConfirmModal').style.display = 'none';
 }

@@ -135,12 +135,8 @@ function copyExport() {
         showToast('Generate preview first', true);
         return;
     }
-    
-    navigator.clipboard.writeText(output).then(() => {
-        showToast('Copied to clipboard!');
-    }).catch(() => {
-        showToast('Failed to copy', true);
-    });
+
+    copyToClipboardSafe(output);
 }
 
 // ============================================

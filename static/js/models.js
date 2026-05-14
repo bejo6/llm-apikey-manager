@@ -348,9 +348,5 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================
 
 function copyToClipboard(text, label) {
-    navigator.clipboard.writeText(text).then(() => {
-        showToast(`${label} copied to clipboard!`);
-    }).catch(() => {
-        showToast('Failed to copy', true);
-    });
+    copyToClipboardSafe(text, `${label} copied to clipboard!`);
 }
